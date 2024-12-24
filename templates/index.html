@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dự Đoán Bệnh Tim</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css')}}" >
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .prediction-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border-radius: 8px;
+            background: #f8f9fa;
+            border-left: 5px solid #007bff;
+        }
+
+        .prediction-text {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .text-danger {
+            color: #dc3545;
+        }
+
+        .text-success {
+            color: #28a745;
+        }
+
+        .advice-section {
+            background: white;
+            border-radius: 8px;
+        }
+
+        .advice-header {
+            background: #007bff;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px 8px 0 0;
+            font-size: 1.2em;
+        }
+
+        .advice-content {
+            padding: 20px;
+            line-height: 1.8;
+        }
+
+        .analysis-item {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 6px;
+        }
+
+        .analysis-title {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        ul {
+            padding-left: 20px;
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+
+        .emoji {
+            margin-right: 8px;
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .prediction-section,
+            .advice-section {
+                margin: 10px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Dự Đoán Nguy Cơ Mắc Bệnh Tim</h1>
+        <form method="POST" action="/">
+            
+            <div class='form-group'>
+                <label for="age">Tuổi:</label>
+                <input type="number" id="age" name="age" required><br>
+            </div>
+            <div class="form-group">
+                <label for="sex">Giới tính (1: Nam, 0: Nữ):</label>
+                <input type="number" id="sex" name="sex" required><br>
+            </div>
+            <div class="form-group">
+                <label for="cp">Loại đau ngực (0-3):</label>
+                <input type="number" id="cp" name="cp" required><br>
+            </div>
+            <div class="form-group">
+                <label for="trestbps">Huyết áp nghỉ (mmHg):</label>
+                <input type="number" id="trestbps" name="trestbps" required><br>
+            </div>
+            
+            <div class="form-group">
+                <label for="chol">Cholesterol (mg/dL):</label>
+                <input type="number" id="chol" name="chol" required><br>
+            </div>
+            <div class="form-group">
+                <label for="fbs">Đường huyết lúc đói > 120 mg/dL (1: Có, 0: Không):</label>
+                <input type="number" id="fbs" name="fbs" required><br>
+            </div>
+            <div class="form-group">
+                <label for="restecg">Điện tâm đồ khi nghỉ (0-2):</label>
+                <input type="number" id="restecg" name="restecg" required><br>
+            </div>
+            <div class="form-group">
+                <label for="thalach">Nhịp tim tối đa:</label>
+                <input type="number" id="thalach" name="thalach" required><br>
+            </div>
+            <div class="form-group">
+                <label for="exang">Đau ngực do gắng sức (1: Có, 0: Không):</label>
+                <input type="number" id="exang" name="exang" required><br>
+            </div>
+            <div class="form-group">
+                <label for="oldpeak">Chênh lệch ST:</label>
+                <input type="number" step="0.1" id="oldpeak" name="oldpeak" required><br>
+            </div>
+
+           
+            <div class="form-group">
+                <label for="slope">Dốc ST (0-2):</label>
+                <input type="number" id="slope" name="slope" required><br>
+            </div>
+            <div class="form-group">
+                <label for="ca">Số lượng mạch máu bị hẹp (0-4):</label>
+                <input type="number" id="ca" name="ca" required><br>
+            </div>
+            <div class="form-group">
+                <label for="thal">Thalassemia (1-3):</label>
+                <input type="number" id="thal" name="thal" required><br>
+            </div>
+
+            <button class="button" type="submit">Dự Đoán</button>
+    </div>
+    <div class="container">
+        {% if prediction is not none %}
+            <div class="prediction-section">
+                <h2>🏥 Kết quả dự đoán</h2>
+                <p class="prediction-text {% if prediction == 1 %}text-danger{% else %}text-success{% endif %}">
+                    {{ prediction_text }}
+                </p>
+            </div>
+
+            <div class="advice-section">
+                <div class="advice-header">
+                    <span class="emoji">👨‍⚕️</span> Phân tích và Lời khuyên từ chuyên gia
+                </div>
+                
+                <div class="advice-content">
+                    <!-- Phân tích chỉ số -->
+                    <h3>📊 Phân tích chi tiết từng chỉ số:</h3>
+                    
+                    <div class="indicator">
+                        <div class="indicator-label">🔵 Tuổi:</div>
+                        <div class="indicator-value">{{ user_data.age[0] }} tuổi</div>
+                        <div class="indicator-comment">{{ age_comment }}</div>
+                    </div>
+
+                    <div class="indicator">
+                        <div class="indicator-label">❤️ Huyết áp:</div>
+                        <div class="indicator-value">{{ user_data.trestbps[0] }} mmHg</div>
+                        <div class="indicator-comment">{{ bp_comment }}</div>
+                    </div>
+
+                    <div class="indicator">
+                        <div class="indicator-label">🔬 Cholesterol:</div>
+                        <div class="indicator-value">{{ user_data.chol[0] }} mg/dl</div>
+                        <div class="indicator-comment">{{ chol_comment }}</div>
+                    </div>
+
+                    <div class="indicator">
+                        <div class="indicator-label">💓 Nhịp tim:</div>
+                        <div class="indicator-value">{{ user_data.thalach[0] }} nhịp/phút</div>
+                        <div class="indicator-comment">{{ heart_rate_comment }}</div>
+                    </div>
+
+                    <!-- Đánh giá nguy cơ -->
+                    <div class="risk-assessment">
+                        <h3>⚠️ Đánh giá mức độ nguy cơ:</h3>
+                        <p>{{ risk_assessment }}</p>
+                    </div>
+
+                    <!-- Lời khuyên -->
+                    <div class="recommendations">
+                        <h3>💡 Lời khuyên:</h3>
+                        {{ recommendations|safe }}
+                    </div>
+
+                    <!-- Các bước tiếp theo -->
+                    <div class="next-steps">
+                        <h3>📋 Các bước cần thực hiện tiếp theo:</h3>
+                        {{ next_steps|safe }}
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</body>
+</html>
