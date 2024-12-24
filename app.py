@@ -17,7 +17,7 @@ class HeartDiseaseAdviser:
         genai.configure(api_key="AIzaSyDWHxXDRmdYt1nKoXHa4VNCjiBskRIv2RE")
     
     
-    def predict(self):
+    def predict(self, X):
         weights = self.model.get('weights')
         bias = self.model.get('bias', 0)
         # Thực hiện dự đoán thủ công
